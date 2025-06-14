@@ -10,6 +10,7 @@ const ContextProvider = (props) => {
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState("");
+  const [darkMode,setDarkMode]=useState(false);
 
   function delayText(index, nextWord) {
     setTimeout(() => {
@@ -80,7 +81,9 @@ const ContextProvider = (props) => {
     input,
     setInput,
     showPreviousPrompt,
-    newChat
+    newChat,
+    darkMode,
+    setDarkMode
   };
 
   return (
