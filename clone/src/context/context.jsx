@@ -6,38 +6,63 @@ export const Context = createContext();
 const ContextProvider = (props) => {
   const [input, setInput] = useState("");
   const [recentPrompt, setRecentPrompt] = useState("");
-  const [prevPrompt, setPrevPrompt] = useState([]);
+  const [prevPrompt, setPrevPrompt] = useState([]); // now storing {prompt, result}
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
   const [resultData, setResultData] = useState("");
 
+  function delayText(index, nextWord) {
+    setTimeout(() => {
+      setResultData(prev => prev + nextWord);
+    }, index * 75);
+  }
 
 
+  let newChat=()=>{
+    setLoading(false);
+    setShowResult(false);
 
+
+  }
 
   const onSent = async (prompt) => {
-    setResultData("")
+    setResultData("");
     setLoading(true);
     setShowResult(true);
     setRecentPrompt(input);
-     const response= await runChat(input);
-     let responseArray = response.split("**");
-     let newResponse="";
-     for(let i=0; i<responseArray.length;i++){
 
-      if(i===0 || i%2===0){
-        newResponse+=responseArray[i];
-      }else{
-        newResponse+= "<b>"+responseArray[i]+ "</b>"
+    const response = await runChat(input);
+
+    let responseArray = response.split("**");
+    let newResponse = "";
+    for (let i = 0; i < responseArray.length; i++) {
+      if (i === 0 || i % 2 === 0) {
+        newResponse += responseArray[i];
+      } else {
+        newResponse += "<b>" + responseArray[i] + "</b>";
       }
+    }
 
+    let newResponse2 = newResponse.split("*").join("</br>");
+    let NewResponseArray = newResponse2.split(" ");
+    for (let i = 0; i < NewResponseArray.length; i++) {
+      let nextWord = NewResponseArray[i];
+      delayText(i, nextWord + " ");
+    }
 
-     }
-     let newResponse2= newResponse.split("*").join("</br>")
+    // Save to prevPrompt with prompt and result
+    setPrevPrompt([...prevPrompt, { prompt: input, result: newResponse2 }]);
 
-     setResultData(newResponse2);
-     setLoading(false);
-     setInput("");
+    setLoading(false);
+    setInput("");
+  };
+
+  const showPreviousPrompt = (promptData) => {
+    setInput("");
+    setRecentPrompt(promptData.prompt);
+    setResultData(promptData.result);
+    setShowResult(true);
+    setLoading(false);
   };
 
   const contextValue = {
@@ -53,7 +78,9 @@ const ContextProvider = (props) => {
     resultData,
     setResultData,
     input,
-    setInput
+    setInput,
+    showPreviousPrompt,
+    newChat
   };
 
   return (
